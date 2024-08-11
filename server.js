@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 
-app.use(express.json())
+app.use(express.json());
 
 const movies = [
   { id: 1, year: "2024", name: "Lift" },
@@ -23,21 +23,20 @@ app.get("/api/movies", (req, res) => {
     query: { filter, value },
   } = req;
   const parsedValue = parseInt(value);
- if (filter && parsedValue)
+  if (filter && parsedValue)
     return res.send(
-      movies.filter((movie) =>  movie[filter].includes(parsedValue))
+      movies.filter((movie) => movie[filter].includes(parsedValue))
     );
-return res.send(movies);
+  return res.send(movies);
 });
 
-app.post('/api/movies', (req, res) => {
-  const { body } = req
-  console.log(body)
-  const newMovie = { id: movies[movies.length - 1].id + 1, ...body}
-  movies.push(newMovie)
-  return res.status(201).send(newMovie)
-})
-
+app.post("/api/movies", (req, res) => {
+  const { body } = req;
+  console.log(body);
+  const newMovie = { id: movies[movies.length - 1].id + 1, ...body };
+  movies.push(newMovie);
+  return res.status(201).send(newMovie);
+});
 
 app.get("/api/movies/:id", (req, res) => {
   console.log(req.params.id);
@@ -51,7 +50,22 @@ app.get("/api/movies/:id", (req, res) => {
   return res.sendStatus(404);
 });
 
-
 app.listen(PORT, () => {
   console.log(`Server running at port ${PORT}...`);
+});
+
+app.put("/api/users/:id", (req, res) => {
+  const {
+    body,
+    params: { id },
+  } = req;
+
+  const parsedId = parseInt(id);
+  if (isNaN(parsedId)) return res.sendStatus(400);
+
+  const findMovieIndex = movies.findIndex((movie) => movie.id === parsedId);
+
+  if (findMovieIndex === -1) return res.sendStatus(404);
+  movies[findMovieIndex] = { id: parsedId, ...body };
+  return res.sendStatus(200)  
 });
