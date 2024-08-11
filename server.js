@@ -1,6 +1,8 @@
 const express = require("express");
 const app = express();
 
+app.use(express.json())
+
 const movies = [
   { id: 1, year: "2024", name: "Lift" },
   { id: 2, year: "2024", name: "Kung Fu Panda" },
@@ -28,6 +30,15 @@ app.get("/api/movies", (req, res) => {
 return res.send(movies);
 });
 
+app.post('/api/movies', (req, res) => {
+  const { body } = req
+  console.log(body)
+  const newMovie = { id: movies[movies.length - 1].id + 1, ...body}
+  movies.push(newMovie)
+  return res.status(201).send(newMovie)
+})
+
+
 app.get("/api/movies/:id", (req, res) => {
   console.log(req.params.id);
   const parsedId = parseInt(req.params.id);
@@ -40,9 +51,6 @@ app.get("/api/movies/:id", (req, res) => {
   return res.sendStatus(404);
 });
 
-app.post('', (req, res) => {
-
-})
 
 app.listen(PORT, () => {
   console.log(`Server running at port ${PORT}...`);
