@@ -82,3 +82,15 @@ app.patch("/api/movies/:id", (req, res) => {
   movies[findMovieIndex] = { ...movies[findMovieIndex], ...body };
   res.sendStatus(200);
 });
+
+app.delete("/api/movies/:id", (req, res) => {
+  const { id } = req.params;
+
+  const parsedId = parseInt(id);
+
+  if (isNaN(parsedId)) return res.sendStatus(400);
+  const findMovieIndex = movies.findIndex((movie) => movie.id === parsedId);
+  if (findMovieIndex === -1) return res.sendStatus(404);
+  movies.splice(findMovieIndex, 1);
+  return res.sendStatus(200);
+});
