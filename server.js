@@ -54,7 +54,7 @@ app.listen(PORT, () => {
   console.log(`Server running at port ${PORT}...`);
 });
 
-app.put("/api/users/:id", (req, res) => {
+app.put("/api/movies/:id", (req, res) => {
   const {
     body,
     params: { id },
@@ -67,5 +67,18 @@ app.put("/api/users/:id", (req, res) => {
 
   if (findMovieIndex === -1) return res.sendStatus(404);
   movies[findMovieIndex] = { id: parsedId, ...body };
-  return res.sendStatus(200)  
+  return res.sendStatus(200);
+});
+
+app.patch("/api/movies/:id", (req, res) => {
+  const {
+    body,
+    params: { id },
+  } = req;
+  const parsedId = parseInt(id);
+  if (isNaN(parsedId)) return res.sendStatus(400);
+  const findMovieIndex = movies.findIndex((movie) => movie.id === parsedId);
+  if (findMovieIndex === -1) return res.sendStatus(404);
+  movies[findMovieIndex] = { ...movies[findMovieIndex], ...body };
+  res.sendStatus(200);
 });
