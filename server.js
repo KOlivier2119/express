@@ -3,6 +3,25 @@ const app = express();
 
 app.use(express.json());
 
+const loggingMiddleware = (req, res, next) => {
+  console.log(`${req.method} - ${req.url}`);
+  next();
+};
+
+const resolveMovieById = (req, res, next) => {
+  const { params: { id} } = req
+  const parsedId = parseInt(id);
+  if (isNaN(parsedId)) return res.sendStatus(400);
+
+  const findMovieIndex = movies.findIndex((movie) => movie.id === parsedId);
+
+  if (findMovieIndex === -1) return res.sendStatus(404);
+  req.findMovieIndex = findMovieIndex;
+  next();
+};
+
+app.use(loggingMiddleware);
+
 const movies = [
   { id: 1, year: "2024", name: "Lift" },
   { id: 2, year: "2024", name: "Kung Fu Panda" },
@@ -54,36 +73,21 @@ app.listen(PORT, () => {
   console.log(`Server running at port ${PORT}...`);
 });
 
-app.put("/api/movies/:id", (req, res) => {
-  const {
-    body,
-    params: { id },
-  } = req;
+app.put("/api/movies/:id", resolveMovieById, (req, res) => {
+  const { body, findMovieIndex } = req;
 
-  const parsedId = parseInt(id);
-  if (isNaN(parsedId)) return res.sendStatus(400);
-
-  const findMovieIndex = movies.findIndex((movie) => movie.id === parsedId);
-
-  if (findMovieIndex === -1) return res.sendStatus(404);
-  movies[findMovieIndex] = { id: parsedId, ...body };
+  movies[findMovieIndex] = { id: movies[findMovieIndex].id, ...body };
   return res.sendStatus(200);
 });
 
 app.patch("/api/movies/:id", (req, res) => {
-  const {
-    body,
-    params: { id },
-  } = req;
-  const parsedId = parseInt(id);
-  if (isNaN(parsedId)) return res.sendStatus(400);
-  const findMovieIndex = movies.findIndex((movie) => movie.id === parsedId);
-  if (findMovieIndex === -1) return res.sendStatus(404);
+  const { body, findMovieIndex } = req;
+
   movies[findMovieIndex] = { ...movies[findMovieIndex], ...body };
   res.sendStatus(200);
 });
 
-app.delete("/api/movies/:id", (req, res) => {
+app.delete("/api/movies/:id",resolveMovieById, (req, res) => {
   const { id } = req.params;
 
   const parsedId = parseInt(id);
