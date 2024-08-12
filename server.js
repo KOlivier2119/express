@@ -57,8 +57,8 @@ app.post("/api/movies", (req, res) => {
   return res.status(201).send(newMovie);
 });
 
-app.get("/api/movies/:id", (req, res) => {
-  console.log(req.params.id);
+app.get("/api/movies/:id", resolveMovieById, (req, res) => {
+  const { findMovieIndex } = req
   const parsedId = parseInt(req.params.id);
   if (isNaN(parsedId)) return res.sendStatus(400);
   const movie_req = movies.find((movie) => {
@@ -88,13 +88,7 @@ app.patch("/api/movies/:id", (req, res) => {
 });
 
 app.delete("/api/movies/:id",resolveMovieById, (req, res) => {
-  const { id } = req.params;
-
-  const parsedId = parseInt(id);
-
-  if (isNaN(parsedId)) return res.sendStatus(400);
-  const findMovieIndex = movies.findIndex((movie) => movie.id === parsedId);
-  if (findMovieIndex === -1) return res.sendStatus(404);
+const { findMovieIndex } = req
   movies.splice(findMovieIndex, 1);
   return res.sendStatus(200);
 });
