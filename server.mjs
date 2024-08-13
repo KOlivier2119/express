@@ -1,5 +1,13 @@
-const express = require("express");
+import express from "express"
+import {
+  query,
+  body,
+  validationResult,
+  matchedData,
+  checkSchema,
+} from "express-validator"
 const app = express();
+import { createMovieValidationSchema } from "./utils/validationShemas.mjs"
 
 app.use(express.json());
 
@@ -9,7 +17,9 @@ const loggingMiddleware = (req, res, next) => {
 };
 
 const resolveMovieById = (req, res, next) => {
-  const { params: { id} } = req
+  const {
+    params: { id },
+  } = req;
   const parsedId = parseInt(id);
   if (isNaN(parsedId)) return res.sendStatus(400);
 
@@ -36,29 +46,46 @@ app.get("/", (req, res) => {
   res.json({ msg: "Home Page" });
 });
 
-app.get("/api/movies", (req, res) => {
-  console.log(req.query);
-  const {
-    query: { filter, value },
-  } = req;
-  const parsedValue = parseInt(value);
-  if (filter && parsedValue)
-    return res.send(
-      movies.filter((movie) => movie[filter].includes(parsedValue))
-    );
-  return res.send(movies);
-});
+app.get(
+  "/api/movies",
+  query("filter")
+    .isString()
+    .notEmpty()
+    .withMessage("Must not be empty")
+    .isLength({ min: 3, max: 10 })
+    .withMessage("Must be atleast 3-10 characters"),
+  (req, res) => {
+    const result = validationResult(req);
+    console.log(result);
+    const {
+      query: { filter, value },
+    } = req;
+    const parsedValue = parseInt(value);
+    if (filter && parsedValue)
+      return res.send(
+        movies.filter((movie) => movie[filter].includes(parsedValue))
+      );
+    return res.send(movies);
+  }
+);
 
-app.post("/api/movies", (req, res) => {
-  const { body } = req;
-  console.log(body);
-  const newMovie = { id: movies[movies.length - 1].id + 1, ...body };
-  movies.push(newMovie);
-  return res.status(201).send(newMovie);
-});
+app.post(
+  "/api/movies",
+  checkSchema(createMovieValidationSchema),
+  (req, res) => {
+    const result = validationResult(req);
+    const data = matchedData(req);
+
+    console.log(data);
+    if (!result.isEmpty()) return res.status(400).send(result.array());
+    const newMovie = { id: movies[movies.length - 1].id + 1, ...data };
+    movies.push(newMovie);
+    return res.status(201).send(newMovie);
+  }
+);
 
 app.get("/api/movies/:id", resolveMovieById, (req, res) => {
-  const { findMovieIndex } = req
+  const { findMovieIndex } = req;
   const parsedId = parseInt(req.params.id);
   if (isNaN(parsedId)) return res.sendStatus(400);
   const movie_req = movies.find((movie) => {
@@ -87,8 +114,8 @@ app.patch("/api/movies/:id", (req, res) => {
   res.sendStatus(200);
 });
 
-app.delete("/api/movies/:id",resolveMovieById, (req, res) => {
-const { findMovieIndex } = req
+app.delete("/api/movies/:id", resolveMovieById, (req, res) => {
+  const { findMovieIndex } = req;
   movies.splice(findMovieIndex, 1);
   return res.sendStatus(200);
 });
