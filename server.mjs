@@ -1,9 +1,9 @@
 import express from "express";
 import cookieParser from "cookie-parser";
-import { createMovieValidationSchema } from "./utils/validationShemas.mjs";
-import movieRouter from "./routes/movies.mjs";
-import { movies } from "./utils/constants.mjs";
-import productRouter from "./routes/products.mjs";
+import { createMovieValidationSchema } from "./src/utils/validationShemas.mjs";
+import movieRouter from "./src/routes/movies.mjs";
+import { movies } from "./src/utils/constants.mjs";
+import productRouter from "./src/routes/products.mjs";
 import session from "express-session";
 
 const app = express();
